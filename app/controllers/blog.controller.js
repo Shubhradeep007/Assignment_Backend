@@ -51,7 +51,7 @@ class BlogController {
             });
         } catch (error) {
             console.error(error);
-            return res.status(StatusCode.SERVER_ERROR || 500).json({
+            return res.status(StatusCode.SERVER_ERROR).json({
                 success: false,
                 message: "Failed to create post"
             });
@@ -64,14 +64,14 @@ class BlogController {
                 .populate("blog_author", "user_name user_email user_profile_image")
                 .sort({ createdAt: -1 });
 
-            return res.status(StatusCode.SUCCESS || 200).json({
+            return res.status(StatusCode.SUCCESS).json({
                 success: true,
                 message: "Posts fetched successfully",
                 data: posts
             });
         } catch (error) {
             console.error(error);
-            return res.status(StatusCode.SERVER_ERROR || 500).json({
+            return res.status(StatusCode.SERVER_ERROR).json({
                 success: false,
                 message: "Failed to fetch posts"
             });
@@ -84,20 +84,20 @@ class BlogController {
             const post = await BlogModel.findById(id).populate("blog_author", "user_name user_email user_profile_image");
 
             if (!post) {
-                return res.status(StatusCode.NOT_FOUND || 404).json({
+                return res.status(StatusCode.NOT_FOUND).json({
                     success: false,
                     message: "Post not found"
                 });
             }
 
-            return res.status(StatusCode.SUCCESS || 200).json({
+            return res.status(StatusCode.SUCCESS).json({
                 success: true,
                 message: "Post fetched successfully",
                 data: post
             });
         } catch (error) {
             console.error(error);
-            return res.status(StatusCode.SERVER_ERROR || 500).json({
+            return res.status(StatusCode.SERVER_ERROR).json({
                 success: false,
                 message: "Failed to fetch post"
             });
@@ -112,29 +112,29 @@ class BlogController {
             const post = await BlogModel.findById(id);
 
             if (!post) {
-                return res.status(StatusCode.NOT_FOUND || 404).json({
+                return res.status(StatusCode.NOT_FOUND).json({
                     success: false,
                     message: "Post not found"
                 });
             }
 
             const userId = (req.user ? (req.user._id || req.user.id) : null) || req.body.author;
-            if (userId && post.blog_author.toString() !== userId.toString()) {
+            const isAdmin = req.user && req.user.role === 'admin';
+
+            if (userId && post.blog_author.toString() !== userId.toString() && !isAdmin) {
                 return res.status(StatusCode.UNAUTHORIZED || 403).json({
                     success: false,
-                    message: "Unauthorized: You are not the owner of this post."
+                    message: "Unauthorized: You are not the owner of this post and do not have admin permissions."
                 });
             }
 
             const image = req.file ? req.file.path : bodyImage;
 
             if (req.file && post.blog_image) {
-                // Determine if it was a local file or a cloudinary file, for safety: 
                 if (!post.blog_image.startsWith('http')) {
                     const oldImagePath = path.join(__dirname, '../../', post.blog_image);
                     deleteFile(oldImagePath);
                 } else {
-                    // Extract public ID from Cloudinary URL -> blogUploads/filename
                     const publicId = post.blog_image.split('/').slice(-2).join('/').split('.')[0];
                     await cloudinary.uploader.destroy(publicId);
                 }
@@ -146,14 +146,14 @@ class BlogController {
 
             await post.save();
 
-            return res.status(StatusCode.SUCCESS || 200).json({
+            return res.status(StatusCode.SUCCESS).json({
                 success: true,
                 message: "Post updated successfully",
                 data: post
             });
         } catch (error) {
             console.error(error);
-            return res.status(StatusCode.SERVER_ERROR || 500).json({
+            return res.status(StatusCode.SERVER_ERROR).json({
                 success: false,
                 message: "Failed to update post"
             });
@@ -166,17 +166,19 @@ class BlogController {
             const post = await BlogModel.findById(id);
 
             if (!post) {
-                return res.status(StatusCode.NOT_FOUND || 404).json({
+                return res.status(StatusCode.NOT_FOUND).json({
                     success: false,
                     message: "Post not found"
                 });
             }
 
             const userId = (req.user ? (req.user._id || req.user.id) : null) || req.body.author;
-            if (userId && post.blog_author.toString() !== userId.toString()) {
-                return res.status(StatusCode.UNAUTHORIZED || 403).json({
+            const isAdmin = req.user && req.user.role === 'admin';
+
+            if (userId && post.blog_author.toString() !== userId.toString() && !isAdmin) {
+                return res.status(StatusCode.UNAUTHORIZED).json({
                     success: false,
-                    message: "Unauthorized: You are not the owner of this post."
+                    message: "Unauthorized: You are not the owner of this post and do not have admin permissions."
                 });
             }
 
@@ -192,13 +194,13 @@ class BlogController {
 
             await BlogModel.findByIdAndDelete(id);
 
-            return res.status(StatusCode.SUCCESS || 200).json({
+            return res.status(StatusCode.SUCCESS).json({
                 success: true,
                 message: "Post deleted successfully"
             });
         } catch (error) {
             console.error(error);
-            return res.status(StatusCode.SERVER_ERROR || 500).json({
+            return res.status(StatusCode.SERVER_ERROR).json({
                 success: false,
                 message: "Failed to delete post"
             });

@@ -144,11 +144,25 @@ class UserController {
         try {
             const id = req.params.id
 
+            // Authorization check
+            if (req.user.id !== id && req.user.role !== 'admin') {
+                // Delete uploaded file if unauthorized
+                if (req.file) {
+                    const publicId = req.file.path.split('/').slice(-2).join('/').split('.')[0];
+                    await cloudinary.uploader.destroy(publicId);
+                }
+                return res.status(StatusCode.UNAUTHORIZED).json({
+                    success: false,
+                    message: "You are not authorized to update this profile"
+                })
+            }
+
             const data = {}
             if (req.body.user_name) data.user_name = req.body.user_name
             if (req.body.user_email) data.user_email = req.body.user_email
             if (req.body.user_password) data.user_password = req.body.user_password
             if (req.body.user_about !== undefined) data.user_about = req.body.user_about
+            if (req.body.role && req.user.role === 'admin') data.role = req.body.role
 
             // Get the current user to check for old image
             const currentUser = await UserModel.findById(id)
@@ -225,6 +239,15 @@ class UserController {
     async deleteUser(req, res) {
         try {
             const id = req.params.id
+
+            // Authorization check
+            if (req.user.id !== id && req.user.role !== 'admin') {
+                return res.status(StatusCode.UNAUTHORIZED).json({
+                    success: false,
+                    message: "You are not authorized to delete this user"
+                })
+            }
+
             const deletedUser = await UserModel.findByIdAndDelete(id)
 
             if (!deletedUser) {

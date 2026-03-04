@@ -12,7 +12,7 @@ router.post("/login", loginLimiter, userController.loginUser)
 
 router.get("/api/me", middlewareAuthCheck, userController.getUserProfile)
 router.put("/update/:id", middlewareAuthCheck, uploadUserCloud.single('user_profile_image'), userController.updateUserProfile)
-router.delete("/delete/:id", middlewareAuthCheck, authorizeRoles('admin'), userController.deleteUser)
+router.delete("/delete/:id", middlewareAuthCheck, userController.deleteUser)
 
 
 
