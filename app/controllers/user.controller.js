@@ -19,7 +19,8 @@ class UserController {
                 user_email: req.body.user_email,
                 user_password: req.body.user_password,
                 user_profile_image: req.file ? req.file.path : undefined,
-                user_about: req.body.user_about
+                user_about: req.body.user_about,
+                role: req.body.role || 'user'
             };
 
             const { error, value } = UserSchmaValidation.validate(requestPayload);
@@ -48,7 +49,8 @@ class UserController {
                 user_email: value.user_email,
                 user_password: hashPassword,
                 user_profile_image: value.user_profile_image,
-                user_about: value.user_about
+                user_about: value.user_about,
+                role: value.role
             });
 
             await user.save();
@@ -57,6 +59,7 @@ class UserController {
                 user_email: user.user_email,
                 user_profile_image: user.user_profile_image,
                 user_about: user.user_about,
+                role: user.role,
                 _id: user._id,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt
@@ -111,6 +114,7 @@ class UserController {
                 user_email: user.user_email,
                 user_profile_image: user.user_profile_image,
                 user_about: user.user_about,
+                role: user.role,
                 createdAt: user.createdAt
             }, process.env.JWT_SECRET_KEY, { expiresIn: "1d" })
 
@@ -123,7 +127,8 @@ class UserController {
                     name: user.user_name,
                     email: user.user_email,
                     image: user.user_profile_image,
-                    about: user.user_about || ""
+                    about: user.user_about || "",
+                    role: user.role
                 },
                 token: token
             })

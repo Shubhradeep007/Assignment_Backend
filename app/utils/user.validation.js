@@ -25,7 +25,8 @@ const UserSchmaValidation = Joi.object({
         }),
 
     user_profile_image: Joi.string().optional(),
-    user_about: Joi.string().allow('').optional()
+    user_about: Joi.string().allow('').optional(),
+    role: Joi.string().valid('user', 'admin').required()
 })
 
 const UserUpdateSchemaValidation = Joi.object({
@@ -50,7 +51,8 @@ const UserUpdateSchemaValidation = Joi.object({
         }),
 
     user_profile_image: Joi.string().optional(),
-    user_about: Joi.string().allow('').optional()
+    user_about: Joi.string().allow('').optional(),
+    role: Joi.string().valid('user', 'admin').optional()
 })
 
 module.exports = { UserSchmaValidation, UserUpdateSchemaValidation }

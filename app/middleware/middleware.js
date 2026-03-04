@@ -4,10 +4,10 @@ const StatusCode = require("../utils/Status.codes")
 const middlewareAuthCheck = async (req, res, next) => {
     const token = req.body?.token || req.query?.token || req.headers["authorization"] || req.headers["x-access-token"]
 
-    if(!token){
+    if (!token) {
         return res.status(StatusCode.BAD_REQUEST).json({
             success: false,
-            message: "Token is required!" 
+            message: "Token is required!"
         })
     }
 
@@ -16,15 +16,27 @@ const middlewareAuthCheck = async (req, res, next) => {
         req.user = decoded
 
         console.log("Loggin done: ", req.user);
-        
+
     } catch (error) {
         return res.status(StatusCode.UNAUTHORIZED).json({
-            success:false,
-            message:"invalid token"
-        })  
+            success: false,
+            message: "invalid token"
+        })
     }
 
     return next()
 }
 
-module.exports = middlewareAuthCheck
+const authorizeRoles = (...roles) => {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            return res.status(StatusCode.UNAUTHORIZED).json({
+                success: false,
+                message: `User role is not authorized to access this route`
+            })
+        }
+        next()
+    }
+}
+
+module.exports = { middlewareAuthCheck, authorizeRoles }

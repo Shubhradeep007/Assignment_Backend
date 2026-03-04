@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const BlogController = require('../controllers/blog.controller');
-const middlewareAuthCheck = require('../middleware/middleware');
+const { middlewareAuthCheck } = require('../middleware/middleware');
 const { uploadCloud } = require('../utils/cloud.imageUpload');
 
 
