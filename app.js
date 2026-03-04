@@ -7,7 +7,7 @@ const { clean: xssClean } = require('xss-clean/lib/xss')
 const app = express()
 const { globalLimiter } = require('./app/utils/limiter')
 
-const DatabaseCon = require('../Backend/app/config/dbconfig')
+const DatabaseCon = require('./app/config/dbconfig')
 DatabaseCon()
 
 app.use(helmet())
